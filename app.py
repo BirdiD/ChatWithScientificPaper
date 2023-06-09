@@ -4,7 +4,11 @@ from PyPDF2 import PdfReader
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
-from langchain.chains.vector_db_qa import load_qa_chain
+from langchain.chains.question_answering import load_qa_chain
+from langchain.llms import OpenAI
+from langchain.callbacks import get_openai_callback
+
+
 import os
 
 load_dotenv('.env')
@@ -28,26 +32,33 @@ def chat():
 
     #Upload file
     pdf = st.file_uploader("Upload your scientific paper", type="pdf")
-    st.write(pdf)
+    
 
-    Extract file
+    #Extract file
     if pdf is not None:
         loader = PdfReader(pdf)
         extracted_text = ""
         for page in loader.pages:
             extracted_text += page.extract_text()
         
+        
 
         chunks = split_into_chunks(extracted_text)
 
-        #Create embeddings
+    #     #Create embeddings
         embeddings = OpenAIEmbeddings()
         db = FAISS.from_texts(chunks, embeddings)
         
-        text_input = st.text_input("Ask you question about the paper")
+        text_input = st.text_input("Ask you question about the paper", disabled=not pdf,)
         if text_input:
             docs = db.similarity_search(text_input)
-            st.write(docs)
+
+            llm = OpenAI()
+            chain = load_qa_chain(llm, chain_type="stuff")
+            with get_openai_callback() as cb:
+                response = chain.run(input_documents=docs, question=text_input)
+                print(cb)
+            st.write(response)
         
 
 if __name__ == "__main__":
