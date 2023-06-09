@@ -30,24 +30,24 @@ def chat():
     pdf = st.file_uploader("Upload your scientific paper", type="pdf")
     st.write(pdf)
 
-    #Extract file
-    # if pdf is not None:
-    #     loader = PdfReader(pdf)
-    #     extracted_text = ""
-    #     for page in loader.pages:
-    #         extracted_text += page.extract_text()
+    Extract file
+    if pdf is not None:
+        loader = PdfReader(pdf)
+        extracted_text = ""
+        for page in loader.pages:
+            extracted_text += page.extract_text()
         
 
-    #     chunks = split_into_chunks(extracted_text)
+        chunks = split_into_chunks(extracted_text)
 
-    #     #Create embeddings
-    #     embeddings = OpenAIEmbeddings()
-    #     db = FAISS.from_texts(chunks, embeddings)
+        #Create embeddings
+        embeddings = OpenAIEmbeddings()
+        db = FAISS.from_texts(chunks, embeddings)
         
-    #     text_input = st.text_input("Ask you question about the paper")
-    #     if text_input:
-    #         docs = db.similarity_search(text_input)
-    #         st.write(docs)
+        text_input = st.text_input("Ask you question about the paper")
+        if text_input:
+            docs = db.similarity_search(text_input)
+            st.write(docs)
         
 
 if __name__ == "__main__":
